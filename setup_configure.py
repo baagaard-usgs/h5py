@@ -57,6 +57,8 @@ class EnvironmentOptions(object):
 
     def __init__(self):
         self.hdf5 = os.environ.get('HDF5_DIR')
+        self.hdf5_incdir = os.environ.get('HDF5_INCDIR')
+        self.hdf5_libdir = os.environ.get('HDF5_LIBDIR')
         self.hdf5_version = os.environ.get('HDF5_VERSION')
         self.mpi = os.environ.get('HDF5_MPI') == "ON"
         if self.hdf5_version is not None:
@@ -85,12 +87,16 @@ class configure(Command):
     description = "Configure h5py build options"
 
     user_options = [('hdf5=', 'h', 'Custom path to HDF5'),
+                    ('hdf5-incdir=', 'i', 'Custom path to HDF5 include directory'),
+                    ('hdf5-libdir=', 'l', 'Custom path to HDF5 lib directory'),
                     ('hdf5-version=', '5', 'HDF5 version "X.Y.Z"'),
                     ('mpi', 'm', 'Enable MPI building'),
                     ('reset', 'r', 'Reset config options') ]
 
     def initialize_options(self):
         self.hdf5 = None
+        self.hdf5_incdir = None
+        self.hdf5_libdir = None
         self.hdf5_version = None
         self.mpi = None
         self.reset = None
@@ -121,10 +127,22 @@ class configure(Command):
             dct['cmd_hdf5'] = self.hdf5
         if env.hdf5 is not None:
             dct['env_hdf5'] = env.hdf5
+            
+        if self.hdf5_incdir is not None:
+            dct['cmd_hdf5_incdir'] = self.hdf5_incdir
+        if env.hdf5_incdir is not None:
+            dct['env_hdf5_incdir'] = env.hdf5_incdir
+
+        if self.hdf5_libdir is not None:
+            dct['cmd_hdf5_libdir'] = self.hdf5_libdir
+        if env.hdf5_libdir is not None:
+            dct['env_hdf5_libdir'] = env.hdf5_libdir
+
         if self.hdf5_version is not None:
             dct['cmd_hdf5_version'] = self.hdf5_version
         if env.hdf5_version is not None:
             dct['env_hdf5_version'] = env.hdf5_version
+            
         if self.mpi is not None:
             dct['cmd_mpi'] = self.mpi
         if env.mpi is not None:
@@ -150,6 +168,14 @@ class configure(Command):
         if self.hdf5 is None:
             self.hdf5 = oldsettings.get('env_hdf5')
 
+        if self.hdf5_incdir is None:
+            self.hdf5_incdir = oldsettings.get('cmd_hdf5_incdir') or \
+              env.hdf5_incdir or oldsettings.get('env_hdf5_incdir')
+
+        if self.hdf5_libdir is None:
+            self.hdf5_libdir = oldsettings.get('cmd_hdf5') or \
+              env.hdf5_libdir or oldsettings.get('env_hdf5_libdir')
+
         if self.hdf5_version is None:
             self.hdf5_version = oldsettings.get('cmd_hdf5_version')
         if self.hdf5_version is None:
@@ -157,7 +183,7 @@ class configure(Command):
         if self.hdf5_version is None:
             self.hdf5_version = oldsettings.get('env_hdf5_version')
         if self.hdf5_version is None:
-            self.hdf5_version = autodetect_version(self.hdf5)
+            self.hdf5_version = autodetect_version(self.hdf5, self.hdf5_libdir)
             print("Autodetected HDF5 %s" % self.hdf5_version)
 
         if self.mpi is None:
@@ -172,15 +198,20 @@ class configure(Command):
         print('*' * 80)
         print(' ' * 23 + "Summary of the h5py configuration")
         print('')
-        print("    Path to HDF5: " + repr(self.hdf5))
-        print("    HDF5 Version: " + repr(self.hdf5_version))
-        print("     MPI Enabled: " + repr(bool(self.mpi)))
-        print("Rebuild Required: " + repr(bool(self.rebuild_required)))
+        if self.hdf5:
+            print("        Path to HDF5: " + repr(self.hdf5))
+        if self.hdf5_incdir:
+            print("    Path to HDF5 lib: " + repr(self.hdf5_incdir))
+        if self.hdf5_libdir:
+            print("Path to HDF5 include: " + repr(self.hdf5_libdir))
+        print("        HDF5 Version: " + repr(self.hdf5_version))
+        print("         MPI Enabled: " + repr(bool(self.mpi)))
+        print("    Rebuild Required: " + repr(bool(self.rebuild_required)))
         print('')
         print('*' * 80)
 
 
-def autodetect_version(hdf5_dir=None):
+def autodetect_version(hdf5_dir=None, hdf5_libdir=None):
     """
     Detect the current version of HDF5, and return X.Y.Z version string.
 
@@ -218,6 +249,8 @@ def autodetect_version(hdf5_dir=None):
         else:
             lib = 'lib'
         libdirs.insert(0, op.join(hdf5_dir, lib))
+    elif hdf5_libdir is not None:
+        libdirs.insert(0, hdf5_libdir)
 
     path = None
     for d in libdirs:

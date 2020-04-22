@@ -88,6 +88,11 @@ class h5py_build_ext(build_ext):
         if config.hdf5 is not None:
             settings['include_dirs'].insert(0, op.join(config.hdf5, 'include'))
             settings['library_dirs'].insert(0, op.join(config.hdf5, 'lib'))
+        elif config.hdf5_incdir or config.hdf5_libdir:
+            if config.hdf5_incdir is not None:
+                settings['include_dirs'].insert(0, config.hdf5_incdir)
+            if config.hdf5_libdir is not None:
+                settings['library_dirs'].insert(0, config.hdf5_libdir)
         else:
             try:
                 if pkgconfig.exists('hdf5'):
