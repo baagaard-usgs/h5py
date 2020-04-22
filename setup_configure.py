@@ -57,7 +57,7 @@ class EnvironmentOptions(object):
 
     def __init__(self):
         self.hdf5 = os.environ.get('HDF5_DIR')
-        self.hdf5_incdir = os.environ.get('HDF5_INCDIR')
+        self.hdf5_includedir = os.environ.get('HDF5_INCLUDEDIR')
         self.hdf5_libdir = os.environ.get('HDF5_LIBDIR')
         self.hdf5_version = os.environ.get('HDF5_VERSION')
         self.mpi = os.environ.get('HDF5_MPI') == "ON"
@@ -87,7 +87,7 @@ class configure(Command):
     description = "Configure h5py build options"
 
     user_options = [('hdf5=', 'h', 'Custom path to HDF5'),
-                    ('hdf5-incdir=', 'i', 'Custom path to HDF5 include directory'),
+                    ('hdf5-includedir=', 'i', 'Custom path to HDF5 include directory'),
                     ('hdf5-libdir=', 'l', 'Custom path to HDF5 lib directory'),
                     ('hdf5-version=', '5', 'HDF5 version "X.Y.Z"'),
                     ('mpi', 'm', 'Enable MPI building'),
@@ -95,7 +95,7 @@ class configure(Command):
 
     def initialize_options(self):
         self.hdf5 = None
-        self.hdf5_incdir = None
+        self.hdf5_includedir = None
         self.hdf5_libdir = None
         self.hdf5_version = None
         self.mpi = None
@@ -128,10 +128,10 @@ class configure(Command):
         if env.hdf5 is not None:
             dct['env_hdf5'] = env.hdf5
             
-        if self.hdf5_incdir is not None:
-            dct['cmd_hdf5_incdir'] = self.hdf5_incdir
-        if env.hdf5_incdir is not None:
-            dct['env_hdf5_incdir'] = env.hdf5_incdir
+        if self.hdf5_includedir is not None:
+            dct['cmd_hdf5_includedir'] = self.hdf5_includedir
+        if env.hdf5_includedir is not None:
+            dct['env_hdf5_includedir'] = env.hdf5_includedir
 
         if self.hdf5_libdir is not None:
             dct['cmd_hdf5_libdir'] = self.hdf5_libdir
@@ -168,9 +168,9 @@ class configure(Command):
         if self.hdf5 is None:
             self.hdf5 = oldsettings.get('env_hdf5')
 
-        if self.hdf5_incdir is None:
-            self.hdf5_incdir = oldsettings.get('cmd_hdf5_incdir') or \
-              env.hdf5_incdir or oldsettings.get('env_hdf5_incdir')
+        if self.hdf5_includedir is None:
+            self.hdf5_includedir = oldsettings.get('cmd_hdf5_includedir') or \
+              env.hdf5_includedir or oldsettings.get('env_hdf5_includedir')
 
         if self.hdf5_libdir is None:
             self.hdf5_libdir = oldsettings.get('cmd_hdf5') or \
@@ -200,8 +200,8 @@ class configure(Command):
         print('')
         if self.hdf5:
             print("        Path to HDF5: " + repr(self.hdf5))
-        if self.hdf5_incdir:
-            print("    Path to HDF5 lib: " + repr(self.hdf5_incdir))
+        if self.hdf5_includedir:
+            print("    Path to HDF5 lib: " + repr(self.hdf5_includedir))
         if self.hdf5_libdir:
             print("Path to HDF5 include: " + repr(self.hdf5_libdir))
         print("        HDF5 Version: " + repr(self.hdf5_version))
