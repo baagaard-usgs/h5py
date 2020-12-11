@@ -173,7 +173,7 @@ class configure(Command):
               env.hdf5_includedir or oldsettings.get('env_hdf5_includedir')
 
         if self.hdf5_libdir is None:
-            self.hdf5_libdir = oldsettings.get('cmd_hdf5') or \
+            self.hdf5_libdir = oldsettings.get('cmd_hdf5_libdir') or \
               env.hdf5_libdir or oldsettings.get('env_hdf5_libdir')
 
         if self.hdf5_version is None:
